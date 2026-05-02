@@ -161,35 +161,35 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, bgMode) {
     }
 
     // 3 FINDER BULLSEYES
-    const angles = [-Math.PI/2, -Math.PI/2 + 2*Math.PI/3, -Math.PI/2 + 4*Math.PI/3];
+    const angles = [-Math.PI / 2, -Math.PI / 2 + 2 * Math.PI / 3, -Math.PI / 2 + 4 * Math.PI / 3];
     const radii = [refR, smallR, smallR];
     for (let i = 0; i < 3; i++) {
         let fx = C + finderDist * Math.cos(angles[i]);
         let fy = C + finderDist * Math.sin(angles[i]);
         let r = radii[i];
-        
+
         // Outer White/Black circle
         targetCtx.fillStyle = DATA_COLOR;
-        targetCtx.beginPath(); targetCtx.arc(fx, fy, r, 0, 2*Math.PI); targetCtx.fill();
-        
+        targetCtx.beginPath(); targetCtx.arc(fx, fy, r, 0, 2 * Math.PI); targetCtx.fill();
+
         // Inner Hole (Ring effect)
         if (isTransparent) {
             targetCtx.globalCompositeOperation = 'destination-out';
-            targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.62, 0, 2*Math.PI); targetCtx.fill();
+            targetCtx.beginPath(); targetCtx.arc(fx, fy, r * 0.62, 0, 2 * Math.PI); targetCtx.fill();
             targetCtx.globalCompositeOperation = 'source-over';
         } else {
             targetCtx.fillStyle = isWhite ? '#FFF' : '#000';
-            targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.62, 0, 2*Math.PI); targetCtx.fill();
+            targetCtx.beginPath(); targetCtx.arc(fx, fy, r * 0.62, 0, 2 * Math.PI); targetCtx.fill();
         }
-        
+
         // Center Dot
         targetCtx.fillStyle = DATA_COLOR;
-        targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.3, 0, 2*Math.PI); targetCtx.fill();
+        targetCtx.beginPath(); targetCtx.arc(fx, fy, r * 0.3, 0, 2 * Math.PI); targetCtx.fill();
     }
 
     // Center dot
     targetCtx.fillStyle = isWhite ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)';
-    targetCtx.beginPath(); targetCtx.arc(C, C, 5, 0, 2*Math.PI); targetCtx.fill();
+    targetCtx.beginPath(); targetCtx.arc(C, C, 5, 0, 2 * Math.PI); targetCtx.fill();
 
     // Label Text
     if (bgMode.includes('label')) {
@@ -198,10 +198,10 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, bgMode) {
         targetCtx.font = "bold 36px 'Space Mono', monospace";
         targetCtx.fillStyle = DATA_COLOR;
         targetCtx.textAlign = "center";
-        
+
         let displayUrl = text;
         if (targetCtx.measureText(text).width > displayWidth) {
-             displayUrl = text.substring(0, 35) + "...";
+            displayUrl = text.substring(0, 35) + "...";
         }
         targetCtx.fillText(displayUrl, C, size - 40);
     }
@@ -219,10 +219,10 @@ function generateCode(text) {
 
     _lastBits = bits;
     _lastNumRings = numRings;
-    
+
     const showLabel = document.getElementById('labelOn').checked;
     const finalMode = showLabel ? 'black-label' : 'black';
-    
+
     drawBarcode(ctx, canvas, bits, numRings, finalMode);
     updateCharCount(filtered, numRings);
 }
@@ -237,7 +237,7 @@ function downloadBarcode(bgMode) {
     offC.width = 1000; offC.height = 1000;
     const offCtx2 = offC.getContext('2d');
     drawBarcode(offCtx2, offC, _lastBits, _lastNumRings, finalMode);
-    
+
     let a = document.createElement('a');
     a.download = filename;
     a.href = offC.toURL ? offC.toURL('image/png') : offC.toDataURL('image/png');
@@ -448,16 +448,16 @@ function playBeep() {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-        
+
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz (Note A5) for a crisp scanner beep
-        
+        oscillator.frequency.setValueAtTime(2000, audioCtx.currentTime); // 880Hz (Note A5) for a crisp scanner beep
+
         gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Set volume
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); // Quick fade out
-        
+
         oscillator.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        
+
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 0.1);
     } catch (e) {
@@ -479,7 +479,7 @@ function displayResult(text, info) {
     // Audio & Haptic feedback
     playBeep();
     if (navigator.vibrate) {
-        try { navigator.vibrate(50); } catch(e) {}
+        try { navigator.vibrate(50); } catch (e) { }
     }
 
     const resultTextEl = document.getElementById('scanResult');
@@ -551,12 +551,12 @@ function decodeFrame(isStaticImage) {
                 for (let j = i + 1; j < candidates.length - 1; j++) {
                     for (let k = j + 1; k < candidates.length; k++) {
                         let [a, b, c] = [candidates[i], candidates[j], candidates[k]];
-                        let d0 = Math.hypot(a.x-b.x, a.y-b.y);
-                        let d1 = Math.hypot(b.x-c.x, b.y-c.y);
-                        let d2 = Math.hypot(a.x-c.x, a.y-c.y);
-                        let avg = (d0+d1+d2)/3;
+                        let d0 = Math.hypot(a.x - b.x, a.y - b.y);
+                        let d1 = Math.hypot(b.x - c.x, b.y - c.y);
+                        let d2 = Math.hypot(a.x - c.x, a.y - c.y);
+                        let avg = (d0 + d1 + d2) / 3;
                         // Score = variance from equilateral
-                        let score = Math.abs(d0-avg) + Math.abs(d1-avg) + Math.abs(d2-avg);
+                        let score = Math.abs(d0 - avg) + Math.abs(d1 - avg) + Math.abs(d2 - avg);
                         if (score < bestScore) { bestScore = score; bestSet = [a, b, c]; }
                     }
                 }
