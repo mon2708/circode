@@ -1,175 +1,140 @@
 import math
 import argparse
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-def generate_minimalist_barcode(text_input: str, output_filename: str = "barcode_remon_v3_spiral.png", show_text: bool = True):
-    """
-    Menghasilkan Single-Ring Visual Code berurutan (Radial/Spiral Offset).
-    Sistem 36 zona (0-9, A-Z) dalam satu cincin dengan jejak titik yang menjorok ke dalam 
-    untuk merekam urutan waktu dan menangani karakter ganda.
-    """
-    scale = 4  
-    size = 1000
-    high_res_size = size * scale
+CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/.?=&-_#%@+*()[]{}<>!$"
+SECTORS = 36
+BITS_PER_CHAR = 7
+MIN_DATA_RINGS = 3
+
+def text_to_bits(text):
+    filtered = "".join([c for c in text if c in CHARSET])
+    if not filtered: return None
     
-    text_input = text_input.upper()
-    valid_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:/.?=&-_#"
-    deg_per_zone = 360.0 / len(valid_chars)
+    bits = []
+    # Header: 6 bits length
+    length_bin = format(len(filtered), '06b')
+    bits.extend([int(b) for b in length_bin])
     
-    filtered_text = "".join([c for c in text_input if c in valid_chars])
+    checksum = 0
+    for char in filtered:
+        idx = CHARSET.index(char)
+        checksum = (checksum + idx) % 64
+        char_bin = format(idx, f'0{BITS_PER_CHAR}b')
+        bits.extend([int(b) for b in char_bin])
+        
+    # Checksum: 6 bits
+    cs_bin = format(checksum, '06b')
+    bits.extend([int(b) for b in cs_bin])
     
-    if not filtered_text:
-        print(f"Input '{text_input}' tidak mengandung karakter valid (0-9, A-Z).")
+    num_rings = max(MIN_DATA_RINGS, math.ceil(len(bits) / SECTORS))
+    while len(bits) < num_rings * SECTORS:
+        bits.append(0)
+        
+    return bits, num_rings
+
+def generate_circode(text, output_path, bg_mode="black", show_text=False):
+    bits_data = text_to_bits(text)
+    if not bits_data:
+        print("Error: No valid characters to encode.")
         return
+    
+    bits, num_rings = bits_data
+    size = 1000
+    # Add extra height for text if requested
+    height = size + 100 if show_text else size
+    img = Image.new("RGBA", (size, height), (0,0,0,0))
+    draw = ImageDraw.Draw(img)
+    
+    C = size / 2
+    is_white_bg = bg_mode == "white"
+    is_transparent = bg_mode == "transparent"
+    
+    # Background
+    if not is_transparent:
+        bg_color = (255, 255, 255, 255) if is_white_bg else (0, 0, 0, 255)
+        draw.rectangle([0, 0, size, height], fill=bg_color)
         
-    center = high_res_size // 2
-    radius = (high_res_size // 2) * 0.75
-    
-    layer = Image.new("RGBA", (high_res_size, high_res_size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(layer)
-    
-    num_chars = len(filtered_text)
-    line_width = max(2 * scale, int(6 * scale * min(1.0, 30 / num_chars)))
-    
-    # Kalkulasi offset jarak untuk merekam urutan
-    max_radial_space = radius - (50 * scale)
-    radial_step = min(45 * scale, max_radial_space / max(1, num_chars))
-    
-    # Mathematical sizing to guarantee NO OVERLAP between dots on the same angle
-    # The black dot MUST be smaller than radial_step / 2
-    black_dot_radius = min(15 * scale, radial_step * 0.45)
-    outline_width = max(1, int(black_dot_radius * 0.25))
-    white_dot_radius = black_dot_radius - outline_width
-    
-    letters = set([c for c in filtered_text if c.isalpha()])
-    pil_angles_letters = sorted([((valid_chars.index(c) * deg_per_zone) - 90) % 360 for c in letters])
-    
-    bbox = [center - radius, center - radius, center + radius, center + radius]
-    
-    # ==========================================
-    # 1. RENDER MAIN RING (Garis Lingkaran)
-    # ==========================================
-    L = len(pil_angles_letters)
-    if L == 0:
-        draw.ellipse(bbox, outline="black", width=line_width + 2 * outline_width)
-        draw.ellipse(bbox, outline="white", width=line_width)
-    else:
-        desired_arc_length = white_dot_radius + (12 * scale) 
-        gap = (desired_arc_length * 360) / (2 * math.pi * radius)
-        outline_angle = (outline_width * 360) / (2 * math.pi * radius)
-        
-        for i in range(L):
-            start_angle = pil_angles_letters[i] + gap
-            end_angle = pil_angles_letters[(i + 1) % L] - gap
-            
-            if i == L - 1:
-                end_angle += 360 
-                
-            if end_angle > start_angle:
-                black_start = start_angle - outline_angle
-                black_end = end_angle + outline_angle
-                draw.arc(bbox, start=black_start, end=black_end, fill="black", width=line_width + 2 * outline_width)
-                draw.arc(bbox, start=start_angle, end=end_angle, fill="white", width=line_width)
+    color_main = (0, 0, 0, 255) if is_white_bg else (255, 255, 255, 255)
+    color_bg = (255, 255, 255, 255) if is_white_bg else (0, 0, 0, 255)
 
-    # ==========================================
-    # 2. RENDER SPOKES (Garis Penghubung Radial)
-    # Membuat desain tidak terlihat 'acak-acakan' melainkan terstruktur seperti Radar
-    # ==========================================
-    for i, char in enumerate(filtered_text):
-        idx = valid_chars.index(char)
-        pil_angle = ((idx * deg_per_zone) - 90) % 360
-        rad_angle = math.radians(pil_angle)
-        
-        current_radius = radius - (i * radial_step)
-        
-        dot_x = center + current_radius * math.cos(rad_angle)
-        dot_y = center + current_radius * math.sin(rad_angle)
-        ring_x = center + radius * math.cos(rad_angle)
-        ring_y = center + radius * math.sin(rad_angle)
-        
-        # Gambar garis lurus tipis dari titik ke ring luar
-        draw.line([(dot_x, dot_y), (ring_x, ring_y)], fill="white", width=int(1.5 * scale))
+    finder_dist = C * 0.82
+    ref_r = C * 0.085
+    small_r = C * 0.065
+    data_outer_r = finder_dist - ref_r - 12
+    data_inner_r = C * 0.13
+    ring_w = (data_outer_r - data_inner_r) / num_rings
+    sector_ang = 360 / SECTORS
 
-    # ==========================================
-    # 3. RENDER DATA DOTS (Titik Angka & Huruf)
-    # Digambar terakhir agar menimpa garis penghubung (pop-out)
-    # ==========================================
-    for i, char in enumerate(filtered_text):
-        idx = valid_chars.index(char)
-        pil_angle = ((idx * deg_per_zone) - 90) % 360
-        rad_angle = math.radians(pil_angle)
+    # DATA CELLS
+    for ring in range(num_rings):
+        oR = data_outer_r - ring * ring_w
+        iR = max(oR - ring_w + 2, data_inner_r + 2) if (ring_w > 2) else data_inner_r
+        # Pillow uses bounding box for arcs: [x0, y0, x1, y1]
+        for sec in range(SECTORS):
+            if bits[ring * SECTORS + sec] == 1:
+                start_angle = sec * sector_ang - 90 + 0.5
+                end_angle = start_angle + sector_ang - 1.0
+                # Draw arc sector
+                # Since PIL's pieslice/arc is tricky for rings, we draw a thick arc
+                mid_r = (oR + iR) / 2
+                w = oR - iR
+                draw.arc([C-mid_r, C-mid_r, C+mid_r, C+mid_r], start_angle, end_angle, fill=color_main, width=int(w))
+
+    # TIMING RING
+    t_r = data_outer_r + 5
+    t_w = 5
+    for s in range(SECTORS):
+        if s % 2 == 0:
+            start_angle = s * sector_ang - 90
+            end_angle = start_angle + sector_ang
+            draw.arc([C-t_r-t_w/2, C-t_r-t_w/2, C+t_r+t_w/2, C+t_r+t_w/2], start_angle, end_angle, fill=color_main, width=t_w)
+
+    # 3 BULLSEYES
+    angles = [-90, -90 + 120, -90 + 240]
+    radii = [ref_r, small_r, small_r]
+    for i in range(3):
+        rad = math.radians(angles[i])
+        fx = C + finder_dist * math.cos(rad)
+        fy = C + finder_dist * math.sin(rad)
+        r = radii[i]
         
-        current_radius = radius - (i * radial_step)
-        
-        dot_x = center + current_radius * math.cos(rad_angle)
-        dot_y = center + current_radius * math.sin(rad_angle)
-        
-        b_bbox = [dot_x - black_dot_radius, dot_y - black_dot_radius, dot_x + black_dot_radius, dot_y + black_dot_radius]
-        w_bbox = [dot_x - white_dot_radius, dot_y - white_dot_radius, dot_x + white_dot_radius, dot_y + white_dot_radius]
-        
-        draw.ellipse(b_bbox, fill="black")
-        draw.ellipse(w_bbox, fill="white")
-        
-    # ==========================================
-    # 4. GEOMETRY START MARKER (Segitiga Atas)
-    # ==========================================
-    triangle_height = 32 * scale
-    triangle_width = 28 * scale
-    
-    tip_x = center
-    tip_y = center - radius - (24 * scale) 
-    base_y = tip_y - triangle_height
-    left_x = center - (triangle_width / 2)
-    right_x = center + (triangle_width / 2)
-    
-    white_pts = [(tip_x, tip_y), (left_x, base_y), (right_x, base_y)]
-    
-    black_tip_y = tip_y + outline_width * 1.5
-    black_base_y = base_y - outline_width * 1.5
-    black_left_x = left_x - outline_width * 1.5
-    black_right_x = right_x + outline_width * 1.5
-    
-    black_pts = [(tip_x, black_tip_y), (black_left_x, black_base_y), (black_right_x, black_base_y)]
-    
-    draw.polygon(black_pts, fill="black")
-    draw.polygon(white_pts, fill="white")
-    
-    # ==========================================
-    # 4. TEXT RENDER
-    # ==========================================
+        # Outer
+        draw.ellipse([fx-r, fy-r, fx+r, fy+r], fill=color_main)
+        # Inner hole
+        ri = r * 0.62
+        draw.ellipse([fx-ri, fy-ri, fx+ri, fy+ri], fill=color_bg if not is_transparent else (0,0,0,0))
+        # Center dot
+        rc = r * 0.3
+        draw.ellipse([fx-rc, fy-rc, fx+rc, fy+rc], fill=color_main)
+
+    # Center dot
+    center_dot_r = 5
+    draw.ellipse([C-center_dot_r, C-center_dot_r, C+center_dot_r, C+center_dot_r], fill=(255,255,255,128) if not is_white_bg else (0,0,0,80))
+
+    # Label Text
     if show_text:
         try:
-            font = ImageFont.truetype("arial.ttf", 46 * scale)
-        except IOError:
-            try:
-                font = ImageFont.load_default(size=46 * scale)
-            except TypeError:
-                font = ImageFont.load_default()
-                
-        text_bbox = draw.textbbox((0, 0), text_input, font=font)
-        text_w = text_bbox[2] - text_bbox[0]
-        
-        text_x = center - (text_w / 2)
-        text_y = center + radius + (40 * scale)
-        
-        offsets = [(-1,-1), (-1,1), (1,-1), (1,1), (0,-1), (0,1), (-1,0), (1,0)]
-        for ox, oy in offsets:
-            draw.text((text_x + ox*outline_width, text_y + oy*outline_width), text_input, font=font, fill="black")
+            # Try to load a mono font, fallback to default
+            font = ImageFont.truetype("arial.ttf", 40)
+        except:
+            font = ImageFont.load_default()
             
-        draw.text((text_x, text_y), text_input, font=font, fill="white")
-        
-    background = Image.new("RGBA", (high_res_size, high_res_size), (0, 0, 0, 255))
-    background.paste(layer, (0, 0), layer)
-    
-    final_img = background.convert("RGB").resize((size, size), Image.Resampling.LANCZOS)
-    final_img.save(output_filename)
-    print(f"Berhasil menyimpan {output_filename} (Text: {filtered_text})")
+        # Draw text at the bottom center
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        draw.text(((size - tw) / 2, size + 20), text, fill=color_main, font=font)
+
+    img.save(output_path)
+    print(f"CirCode generated: {output_path}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate Minimalist Single-Ring Barcode (Radial Sequence)")
-    parser.add_argument("--text", type=str, default="REMON2026", help="Teks untuk di-encode")
-    parser.add_argument("--out", type=str, default="barcode_remon_v3_spiral.png", help="Nama file output")
-    parser.add_argument("--no-text", action="store_true", help="Sembunyikan teks di bawah logo")
+    parser = argparse.ArgumentParser(description="CirCode Generator")
+    parser.add_argument("--text", required=True, help="Text to encode")
+    parser.add_argument("--out", default="barcode_v2.png", help="Output filename")
+    parser.add_argument("--bg", choices=["black", "white", "transparent"], default="black", help="Background mode")
+    parser.add_argument("--show-text", action="store_true", help="Display text below the code")
     args = parser.parse_args()
     
-    generate_minimalist_barcode(args.text, args.out, not args.no_text)
+    generate_circode(args.text, args.out, args.bg, args.show_text)

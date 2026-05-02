@@ -1,9 +1,9 @@
 // ==========================================
-// CirCode v2 — Circular QR Hybrid System
+// CirCode — Circular QR Hybrid System
 // ==========================================
-const CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:/.?=&-_#";
+const CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/.?=&-_#%@+*()[]{}<>!$";
 const SECTORS = 36;
-const BITS_PER_CHAR = 6;
+const BITS_PER_CHAR = 7;
 const MIN_DATA_RINGS = 3;
 
 // URL pattern detection
@@ -17,41 +17,47 @@ function isURL(text) {
 // ENCODING / DECODING
 // ==========================================
 function textToBits(text) {
-    let filtered = text.toUpperCase().split('').filter(c => CHARSET.includes(c)).join('');
+    let filtered = text.split('').filter(c => CHARSET.includes(c)).join('');
     if (!filtered) return { bits: [], filtered: '', numRings: 0 };
     let bits = [];
-    // Header: 6 bits = length
-    bits.push(...filtered.length.toString(2).padStart(BITS_PER_CHAR, '0').split('').map(Number));
+    // Header: 6 bits = length (max 63 chars)
+    bits.push(...filtered.length.toString(2).padStart(6, '0').split('').map(Number));
     let checksum = 0;
     for (let ch of filtered) {
         let idx = CHARSET.indexOf(ch);
         checksum = (checksum + idx) % 64;
         bits.push(...idx.toString(2).padStart(BITS_PER_CHAR, '0').split('').map(Number));
     }
-    // Checksum: 6 bits
-    bits.push(...checksum.toString(2).padStart(BITS_PER_CHAR, '0').split('').map(Number));
+    // Checksum: 6 bits (fixed at 6 regardless of BITS_PER_CHAR)
+    bits.push(...checksum.toString(2).padStart(6, '0').split('').map(Number));
     let numRings = Math.max(MIN_DATA_RINGS, Math.ceil(bits.length / SECTORS));
     while (bits.length < numRings * SECTORS) bits.push(0);
     return { bits, filtered, numRings };
 }
 
 function bitsToText(bits) {
-    if (bits.length < 12) return null;
+    if (bits.length < 13) return null; // Header(6) + at least 1 char(7)
     let len = 0;
     for (let i = 0; i < 6; i++) len = (len << 1) | bits[i];
-    if (len === 0 || len > 55) return null;
-    let need = 6 + len * 6 + 6;
+    if (len === 0 || len > 63) return null;
+    let need = 6 + len * 7 + 6;
     if (bits.length < need) return null;
     let result = '', checksum = 0;
     for (let i = 0; i < len; i++) {
         let val = 0;
-        for (let j = 0; j < 6; j++) val = (val << 1) | bits[6 + i * 6 + j];
+        let offset = 6 + i * 7;
+        for (let j = 0; j < 7; j++) val = (val << 1) | bits[offset + j];
         if (val >= CHARSET.length) return null;
         result += CHARSET[val];
         checksum = (checksum + val) % 64;
     }
-    let csOff = 6 + len * 6, csVal = 0;
-    for (let i = 0; i < 6; i++) csVal = (csVal << 1) | bits[csOff + i];
+    let csOff = 6 + len * 7, csVal = 0;
+    // Read 6 bits for checksum
+    for (let i = 0; i < 6; i++) {
+        if (csOff + i < bits.length) {
+            csVal = (csVal << 1) | bits[csOff + i];
+        }
+    }
     if (csVal !== checksum) return null;
     return result;
 }
@@ -90,9 +96,11 @@ function updateCharCount(filtered, numRings) {
     charCount.textContent = `${filtered.length} chars · ${numRings} rings`;
 }
 
-function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
+function drawBarcode(targetCtx, targetCanvas, bits, numRings, bgMode) {
     const size = targetCanvas.width;
     const C = size / 2;
+    const isTransparent = bgMode === 'transparent';
+    const isWhite = bgMode === 'white';
 
     const finderDist = C * 0.82;
     const refR = C * 0.085, smallR = C * 0.065;
@@ -102,19 +110,21 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
     const sectorAng = (2 * Math.PI) / SECTORS;
 
     // Background
-    if (transparent) {
+    if (isTransparent) {
         targetCtx.clearRect(0, 0, size, size);
+    } else if (isWhite) {
+        targetCtx.fillStyle = '#FFF';
+        targetCtx.fillRect(0, 0, size, size);
     } else {
         targetCtx.fillStyle = '#000';
         targetCtx.fillRect(0, 0, size, size);
     }
 
-    const WHITE = '#FFFFFF';
-    const BLACK = transparent ? 'rgba(0,0,0,0)' : '#000000';
+    const DATA_COLOR = isWhite ? '#000000' : '#FFFFFF';
 
     // Subtle outer guide ring (only for solid bg)
-    if (!transparent) {
-        targetCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+    if (!isTransparent) {
+        targetCtx.strokeStyle = isWhite ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
         targetCtx.lineWidth = 1;
         targetCtx.beginPath();
         targetCtx.arc(C, C, finderDist + refR + 8, 0, 2 * Math.PI);
@@ -122,6 +132,7 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
     }
 
     // DATA CELLS
+    targetCtx.fillStyle = DATA_COLOR;
     for (let ring = 0; ring < numRings; ring++) {
         let oR = dataOuterR - ring * ringW;
         let iR = oR - ringW + 2;
@@ -129,7 +140,6 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
             if (bits[ring * SECTORS + sec] === 1) {
                 let a1 = sec * sectorAng - Math.PI / 2 + 0.012;
                 let a2 = a1 + sectorAng - 0.024;
-                targetCtx.fillStyle = WHITE;
                 targetCtx.beginPath();
                 targetCtx.arc(C, C, oR, a1, a2);
                 targetCtx.arc(C, C, Math.max(iR, dataInnerR + 2), a2, a1, true);
@@ -140,11 +150,11 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
     }
 
     // TIMING RING
-    let tR = dataOuterR + 5, tW = 5;
+    targetCtx.fillStyle = DATA_COLOR;
     for (let s = 0; s < SECTORS; s++) {
         if (s % 2 === 0) {
+            let tR = dataOuterR + 5, tW = 5;
             let a1 = s * sectorAng - Math.PI / 2;
-            targetCtx.fillStyle = WHITE;
             targetCtx.beginPath();
             targetCtx.arc(C, C, tR + tW, a1, a1 + sectorAng);
             targetCtx.arc(C, C, tR, a1 + sectorAng, a1, true);
@@ -159,20 +169,35 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, transparent) {
         let fx = C + finderDist * Math.cos(angles[i]);
         let fy = C + finderDist * Math.sin(angles[i]);
         let r = radii[i];
-        targetCtx.fillStyle = WHITE; targetCtx.beginPath(); targetCtx.arc(fx, fy, r, 0, 2*Math.PI); targetCtx.fill();
-        targetCtx.fillStyle = BLACK; targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.62, 0, 2*Math.PI); targetCtx.fill();
-        targetCtx.fillStyle = WHITE; targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.3, 0, 2*Math.PI); targetCtx.fill();
+        
+        // Outer White/Black circle
+        targetCtx.fillStyle = DATA_COLOR;
+        targetCtx.beginPath(); targetCtx.arc(fx, fy, r, 0, 2*Math.PI); targetCtx.fill();
+        
+        // Inner Hole (Ring effect)
+        if (isTransparent) {
+            targetCtx.globalCompositeOperation = 'destination-out';
+            targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.62, 0, 2*Math.PI); targetCtx.fill();
+            targetCtx.globalCompositeOperation = 'source-over';
+        } else {
+            targetCtx.fillStyle = isWhite ? '#FFF' : '#000';
+            targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.62, 0, 2*Math.PI); targetCtx.fill();
+        }
+        
+        // Center Dot
+        targetCtx.fillStyle = DATA_COLOR;
+        targetCtx.beginPath(); targetCtx.arc(fx, fy, r*0.3, 0, 2*Math.PI); targetCtx.fill();
     }
 
     // Center dot
-    targetCtx.fillStyle = 'rgba(255,255,255,0.5)';
+    targetCtx.fillStyle = isWhite ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)';
     targetCtx.beginPath(); targetCtx.arc(C, C, 5, 0, 2*Math.PI); targetCtx.fill();
 }
 
 // Store last bits/numRings for re-download without regenerate
 let _lastBits = null, _lastNumRings = 0;
 
-function generateV2(text) {
+function generateCode(text) {
     const { bits, filtered, numRings } = textToBits(text);
     if (!filtered) { charCount.textContent = 'No valid characters'; return; }
 
@@ -185,34 +210,27 @@ function generateV2(text) {
     updateCharCount(filtered, numRings);
 }
 
-function downloadBarcode(transparent) {
+function downloadBarcode(bgMode) {
     if (!_lastBits) return;
-    const suffix = transparent ? 'transparent' : 'black';
-    const filename = `circode-${textInput.value.substring(0, 20).replace(/[^a-z0-9]/gi, '_')}-${suffix}.png`;
+    const filename = `circode-${textInput.value.substring(0, 20).replace(/[^a-z0-9]/gi, '_')}-${bgMode}.png`;
 
-    if (transparent) {
-        // Render to offscreen canvas with transparent bg
-        const offC = document.createElement('canvas');
-        offC.width = 1000; offC.height = 1000;
-        const offCtx2 = offC.getContext('2d');
-        drawBarcode(offCtx2, offC, _lastBits, _lastNumRings, true);
-        let a = document.createElement('a');
-        a.download = filename;
-        a.href = offC.toDataURL('image/png');
-        a.click();
-    } else {
-        let a = document.createElement('a');
-        a.download = filename;
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-    }
+    const offC = document.createElement('canvas');
+    offC.width = 1000; offC.height = 1000;
+    const offCtx2 = offC.getContext('2d');
+    drawBarcode(offCtx2, offC, _lastBits, _lastNumRings, bgMode);
+    
+    let a = document.createElement('a');
+    a.download = filename;
+    a.href = offC.toURL ? offC.toURL('image/png') : offC.toDataURL('image/png');
+    a.click();
 }
 
-document.getElementById('generateBtn').addEventListener('click', () => generateV2(textInput.value));
-textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generateV2(textInput.value); });
-document.getElementById('downloadBlackBtn').addEventListener('click', () => downloadBarcode(false));
-document.getElementById('downloadTransparentBtn').addEventListener('click', () => downloadBarcode(true));
-generateV2(textInput.value);
+document.getElementById('generateBtn').addEventListener('click', () => generateCode(textInput.value));
+textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generateCode(textInput.value); });
+document.getElementById('downloadBlackBtn').addEventListener('click', () => downloadBarcode('black'));
+document.getElementById('downloadWhiteBtn').addEventListener('click', () => downloadBarcode('white'));
+document.getElementById('downloadTransparentBtn').addEventListener('click', () => downloadBarcode('transparent'));
+generateCode(textInput.value);
 
 // ==========================================
 // SCANNER STATE
@@ -334,6 +352,9 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
             if (streaming) stopCamera();
             document.getElementById('scannerPlaceholder').style.display = 'none';
             scanCanvas.width = img.width; scanCanvas.height = img.height;
+            // Force black background for transparency support
+            scanCtx.fillStyle = '#000';
+            scanCtx.fillRect(0, 0, scanCanvas.width, scanCanvas.height);
             scanCtx.drawImage(img, 0, 0);
             decodeFrame(true);
         };
