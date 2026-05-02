@@ -71,25 +71,25 @@ def generate_circode(text, output_path, bg_mode="black", show_text=False):
     for ring in range(num_rings):
         oR = data_outer_r - ring * ring_w
         iR = max(oR - ring_w + 2, data_inner_r + 2) if (ring_w > 2) else data_inner_r
-        # Pillow uses bounding box for arcs: [x0, y0, x1, y1]
+        
+        # FIX: Bounding box harus di oR agar data benar-benar sampai ke tepi luar
         for sec in range(SECTORS):
             if bits[ring * SECTORS + sec] == 1:
                 start_angle = sec * sector_ang - 90 + 0.5
                 end_angle = start_angle + sector_ang - 1.0
-                # Draw arc sector
-                # Since PIL's pieslice/arc is tricky for rings, we draw a thick arc
-                mid_r = (oR + iR) / 2
                 w = oR - iR
-                draw.arc([C-mid_r, C-mid_r, C+mid_r, C+mid_r], start_angle, end_angle, fill=color_main, width=int(w))
+                # Gunakan oR sebagai pembatas luar
+                draw.arc([C-oR, C-oR, C+oR, C+oR], start_angle, end_angle, fill=color_main, width=int(w))
 
-    # TIMING RING
-    t_r = data_outer_r + 5
+    # TIMING RING (Merapatkan jarak: Gap 1-2px)
+    # Bounding box di data_outer_r + 6, tebal 5 -> Inner edge di data_outer_r + 1
+    t_box_r = data_outer_r + 6.0
     t_w = 5
     for s in range(SECTORS):
         if s % 2 == 0:
             start_angle = s * sector_ang - 90
             end_angle = start_angle + sector_ang
-            draw.arc([C-t_r-t_w/2, C-t_r-t_w/2, C+t_r+t_w/2, C+t_r+t_w/2], start_angle, end_angle, fill=color_main, width=t_w)
+            draw.arc([C-t_box_r, C-t_box_r, C+t_box_r, C+t_box_r], start_angle, end_angle, fill=color_main, width=t_w)
 
     # 3 BULLSEYES
     angles = [-90, -90 + 120, -90 + 240]
@@ -121,14 +121,10 @@ def generate_circode(text, output_path, bg_mode="black", show_text=False):
         except:
             font = ImageFont.load_default()
             
-        display_text = text
-        if len(display_text) > 40:
-            display_text = display_text[:37] + "..."
-            
         # Draw text at the bottom center
-        bbox = draw.textbbox((0, 0), display_text, font=font)
+        bbox = draw.textbbox((0, 0), text, font=font)
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        draw.text(((size - tw) / 2, size + 20), display_text, fill=color_main, font=font)
+        draw.text(((size - tw) / 2, size + 20), text, fill=color_main, font=font)
 
     img.save(output_path)
     print(f"CirCode generated: {output_path}")
