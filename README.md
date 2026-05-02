@@ -104,3 +104,10 @@ python decoder.py --image "barcode.png"
 ---
 
 **Developed by Remon · 2026**
+## 🤝 Contributors
+
+*   **Gemini (Google)** - Core Logic & Mathematical Mapping Consultant
+*   **Claude (Anthropic)** - Web Architecture & Scanner Optimization Consultant
+
+---
+*This project is a human-AI collaboration.*
