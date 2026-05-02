@@ -27,6 +27,7 @@
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
     <link rel="apple-touch-icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
+    <link rel="manifest" href="manifest.json">
 
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -208,6 +209,17 @@
         </footer>
     </div>
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('ServiceWorker registered:', reg.scope);
+                }).catch(err => {
+                    console.log('ServiceWorker error:', err);
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
