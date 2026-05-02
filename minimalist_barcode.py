@@ -121,10 +121,14 @@ def generate_circode(text, output_path, bg_mode="black", show_text=False):
         except:
             font = ImageFont.load_default()
             
+        display_text = text
+        if len(display_text) > 40:
+            display_text = display_text[:37] + "..."
+            
         # Draw text at the bottom center
-        bbox = draw.textbbox((0, 0), text, font=font)
+        bbox = draw.textbbox((0, 0), display_text, font=font)
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        draw.text(((size - tw) / 2, size + 20), text, fill=color_main, font=font)
+        draw.text(((size - tw) / 2, size + 20), display_text, fill=color_main, font=font)
 
     img.save(output_path)
     print(f"CirCode generated: {output_path}")

@@ -275,6 +275,24 @@ button {
     flex: 1;
 }
 
+.options-row {
+    margin: 0.5rem 0;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.checkbox-container input {
+    cursor: pointer;
+}
+
 /* ===== CHAR COUNT ===== */
 .char-count-row {
     text-align: center;

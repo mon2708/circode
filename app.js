@@ -192,6 +192,21 @@ function drawBarcode(targetCtx, targetCanvas, bits, numRings, bgMode) {
     // Center dot
     targetCtx.fillStyle = isWhite ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)';
     targetCtx.beginPath(); targetCtx.arc(C, C, 5, 0, 2*Math.PI); targetCtx.fill();
+
+    // Label Text (Only if requested)
+    if (bgMode.includes('label')) {
+        const text = textInput.value;
+        const displayWidth = size * 0.9;
+        targetCtx.font = "bold 36px 'Space Mono', monospace";
+        targetCtx.fillStyle = DATA_COLOR;
+        targetCtx.textAlign = "center";
+        
+        let displayUrl = text;
+        if (targetCtx.measureText(text).width > displayWidth) {
+             displayUrl = text.substring(0, 35) + "...";
+        }
+        targetCtx.fillText(displayUrl, C, size - 40);
+    }
 }
 
 // Store last bits/numRings for re-download without regenerate
@@ -212,12 +227,15 @@ function generateCode(text) {
 
 function downloadBarcode(bgMode) {
     if (!_lastBits) return;
+    const showLabel = document.getElementById('showLabelToggle').checked;
+    const finalMode = showLabel ? bgMode + '-label' : bgMode;
+    
     const filename = `circode-${textInput.value.substring(0, 20).replace(/[^a-z0-9]/gi, '_')}-${bgMode}.png`;
 
     const offC = document.createElement('canvas');
     offC.width = 1000; offC.height = 1000;
     const offCtx2 = offC.getContext('2d');
-    drawBarcode(offCtx2, offC, _lastBits, _lastNumRings, bgMode);
+    drawBarcode(offCtx2, offC, _lastBits, _lastNumRings, finalMode);
     
     let a = document.createElement('a');
     a.download = filename;
