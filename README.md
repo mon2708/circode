@@ -1,45 +1,38 @@
-# Circode: Custom Circular Barcode System
+# Circode: Minimalist Visual Code System
 
-Circode adalah sistem barcode melingkar kustom yang menggabungkan estetika desain futuristik dengan fungsionalitas data encoding berbasis sudut (Angular Encoding). Project ini dikembangkan untuk kebutuhan branding premium yang membutuhkan identitas visual unik.
+Circode adalah sistem identifikasi visual melingkar yang menggabungkan estetika desain futuristik dengan fungsionalitas data encoding berbasis sudut (Angular Encoding). Project ini dirancang untuk branding premium, label produk, dan identitas visual unik.
 
 ## 🚀 Fitur Utama
 
-Project ini memiliki dua sistem utama yang bisa dipilih sesuai kebutuhan:
+Sistem ini menggunakan pendekatan **Minimalist Single-Ring** yang dioptimalkan untuk performa cetak dan pembacaan digital:
 
-### 1. Minimalist Barcode (Single-Ring + Radar Spokes)
-Sistem 1 cincin yang sangat elegan, dirancang untuk estetika premium namun tetap fungsional.
 - **Radial Offset Sequence**: Meskipun hanya menggunakan satu cincin, sistem ini tetap bisa menyimpan urutan karakter (sequence) dan menangani karakter ganda dengan cara menempatkan titik data secara menjorok ke dalam (Spiral/Radial).
-- **Radar Spoke Design**: Menghubungkan titik data ke cincin utama dengan garis tipis untuk memberikan tampilan terstruktur ala radar militer/Sci-Fi.
-- **Orientation Marker**: Dilengkapi dengan segitiga penunjuk arah (0°) agar kode tetap bisa dibaca meskipun posisi stiker miring.
-- **Print-Safe**: Garis dan titik telah dioptimalkan ketebalannya untuk kebutuhan cetak fisik pada media kecil.
-
-### 2. Circular Barcode (Multi-Ring)
-Sistem multi-cincin konsentris untuk kapasitas data yang lebih besar.
-- **Perfect Sequence**: Karakter pertama berada di cincin terluar, karakter terakhir di cincin terdalam.
-- **High Data Capacity**: Cocok untuk menyimpan teks panjang atau kode serial yang kompleks.
+- **Radar Spoke Design**: Menghubungkan titik data ke cincin utama dengan garis tipis ("jari-jari") untuk memberikan tampilan terstruktur ala radar militer/Sci-Fi. Ini memecahkan masalah estetika titik yang terlihat acak.
+- **Orientation Marker**: Dilengkapi dengan segitiga penunjuk arah (0°) agar kode tetap bisa dibaca secara akurat meskipun posisi stiker miring atau terbalik.
+- **Print-Safe Design**: Ketebalan garis (6px) dan ukuran titik (12px) telah disesuaikan agar tetap tajam saat dicetak pada media fisik seperti stiker kecil atau plat label.
 
 ---
 
 ## 🛠️ Cara Penggunaan
 
 ### Persyaratan
-Pastikan Anda sudah menginstal Python dan library yang dibutuhkan:
+Instalasi library yang dibutuhkan menggunakan pip:
 ```bash
 pip install pillow opencv-python numpy
 ```
 
 ### Generator (Membuat Barcode)
-Gunakan `minimalist_barcode.py` untuk membuat desain minimalis terbaru:
+Gunakan `minimalist_barcode.py` untuk menghasilkan gambar barcode:
 ```bash
 python minimalist_barcode.py --text "REMON2026" --out "barcode.png"
 ```
-Argumen:
+**Argumen:**
 - `--text`: Teks yang ingin di-encode (Angka 0-9 dan Huruf A-Z).
 - `--out`: Nama file output (.png).
-- `--no-text`: Tambahkan flag ini jika ingin menyembunyikan teks di bawah logo.
+- `--no-text`: Gunakan flag ini untuk menyembunyikan tulisan teks di bawah logo (untuk hasil yang lebih bersih).
 
 ### Scanner / Decoder (Membaca Barcode)
-Gunakan `decoder.py` untuk membaca hasil barcode menggunakan teknologi Computer Vision:
+Gunakan `decoder.py` untuk memproses gambar dan mengembalikan teks aslinya:
 ```bash
 python decoder.py --image "barcode.png"
 ```
@@ -47,10 +40,12 @@ python decoder.py --image "barcode.png"
 ---
 
 ## 📐 Logika Encoding
-Sistem membagi lingkaran 360° menjadi 36 zona (masing-masing 10°):
+Sistem memetakan karakter ke dalam 36 zona angular (10° per zona):
 - **0 - 9**: Index 0 sampai 9.
 - **A - Z**: Index 10 sampai 35.
-- **0° (Jam 12)**: Titik awal pembacaan.
+- **0° (Arah Jam 12)**: Titik awal pembacaan (ditandai dengan segitiga).
+
+Urutan pembacaan didasarkan pada jarak titik dari pusat (Radial Distance). Titik terluar adalah karakter pertama, dan semakin masuk ke dalam adalah karakter selanjutnya.
 
 ---
 
