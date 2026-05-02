@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="CirCode v2 — Circular QR Encoding System. Generate and scan circular barcodes.">
+    <title>CirCode v2 | Circular QR System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady();"
+        type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="brand">
+                <h1>CirCode<span class="dot">.</span></h1>
+            </div>
+            <p class="subtitle">Circular QR Encoding System</p>
+        </header>
+
+        <main>
+            <div class="tabs" role="tablist">
+                <button class="tab-btn active" data-target="generator" role="tab" aria-selected="true"
+                    id="tab-generator">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 8v4l3 3" />
+                    </svg>
+                    Generator
+                </button>
+                <button class="tab-btn" data-target="scanner" role="tab" aria-selected="false" id="tab-scanner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+                        <rect x="7" y="7" width="10" height="10" rx="1" />
+                    </svg>
+                    Scanner
+                </button>
+            </div>
+
+            <!-- GENERATOR SECTION -->
+            <section id="generator" class="tab-content active" role="tabpanel">
+                <div class="control-panel">
+                    <div class="input-group">
+                        <label for="textInput">DATA INPUT</label>
+                        <div class="input-row">
+                            <input type="text" id="textInput" placeholder="Text or URL..." value="REMON2026"
+                                autocomplete="off" autocorrect="off" spellcheck="false">
+                            <button id="generateBtn" class="primary-btn">Generate</button>
+                        </div>
+                    </div>
+                    <div class="download-row">
+                        <button id="downloadBlackBtn" class="secondary-btn flex-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Black BG
+                        </button>
+                        <button id="downloadTransparentBtn" class="secondary-btn flex-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Transparent
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="barcodeCanvas" width="1000" height="1000"></canvas>
+                </div>
+                <div class="char-count-row">
+                    <span id="charCount" class="char-count">0 chars · 0 rings</span>
+                </div>
+            </section>
+
+            <!-- SCANNER SECTION -->
+            <section id="scanner" class="tab-content" role="tabpanel">
+                <div class="control-panel scanner-controls">
+                    <div class="status-row">
+                        <div class="status-dot" id="statusDot"></div>
+                        <p class="status-text" id="cvStatus">Loading OpenCV.js...</p>
+                    </div>
+                    <div class="btn-row">
+                        <button id="startCameraBtn" class="primary-btn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 7l-7 5 7 5V7z" />
+                                <rect x="1" y="5" width="15" height="14" rx="2" />
+                            </svg>
+                            Live Cam
+                        </button>
+                        <button id="stopCameraBtn" class="secondary-btn" disabled>Stop</button>
+                        <label for="fileInput" class="secondary-btn upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17,8 12,3 7,8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            Upload
+                        </label>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <div class="scanner-container" id="scannerContainer">
+                    <video id="videoElement" autoplay playsinline muted></video>
+                    <canvas id="scannerOverlay"></canvas>
+                    <div class="scanner-frame">
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+                        <div class="scan-line" id="scanLine"></div>
+                    </div>
+                    <div class="scanner-placeholder" id="scannerPlaceholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1">
+                            <path
+                                d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+                            <rect x="7" y="7" width="10" height="10" rx="1" />
+                        </svg>
+                        <p>Tap "Live Cam" or upload an image</p>
+                    </div>
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <div class="result-header">
+                        <h3>SCAN RESULT</h3>
+                        <span class="scan-confidence" id="scanConfidence"></span>
+                    </div>
+                    <div id="scanResult" class="result-text">WAITING...</div>
+                    <div id="scanInfo" class="scan-info"></div>
+                    <a id="gotoLinkBtn" class="goto-link-btn" href="#" target="_blank" rel="noopener noreferrer"
+                        style="display:none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15,3 21,3 21,9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                        Go to Link
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>GNU GPLv3 · Created by Remon · <a href="https://github.com/mon2708/circode" target="_blank"
+                    rel="noopener">GitHub</a></p>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

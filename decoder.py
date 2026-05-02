@@ -15,7 +15,7 @@ def decode_barcode(image_path):
     cx, cy = w / 2.0, h / 2.0
     
     # Thresholding untuk memisahkan bentuk putih dari latar belakang hitam
-    _, thresh = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+    _, thresh = cv2.threshold(img, 200, 255, cv2.THRESH_BINARY)
     
     # Mencari contours (garis luar bentuk)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -26,7 +26,7 @@ def decode_barcode(image_path):
     
     for c in contours:
         area = cv2.contourArea(c)
-        if area < 50: # Abaikan noise kecil
+        if area < 2: # Abaikan noise kecil
             continue
             
         peri = cv2.arcLength(c, True)
@@ -45,8 +45,8 @@ def decode_barcode(image_path):
             triangle = c
             triangle_center = (mx, my)
             
-        # Deteksi Titik Putih (Data Karakter) - Berbentuk lingkaran penuh
-        elif circ > 0.8:
+        # Deteksi Titik Putih (Data Karakter)
+        elif circ > 0.75:
             dots.append((mx, my))
             
     if triangle_center is None:
@@ -64,7 +64,7 @@ def decode_barcode(image_path):
         dist = math.hypot(x - cx, y - cy)
         # Filter: Ambil semua titik yang berada di dalam area batas cincin utama.
         # Teks berada jauh di luar batas cincin (dist > dist_triangle)
-        if dist < dist_triangle * 0.95:
+        if dist < dist_triangle - 2:
             valid_dots.append({"x": x, "y": y, "dist": dist})
             
     if not valid_dots:
@@ -75,8 +75,9 @@ def decode_barcode(image_path):
     # Titik terluar adalah huruf ke-1, yang masuk ke dalam adalah huruf ke-2, dst.
     valid_dots.sort(key=lambda d: d["dist"], reverse=True)
     
-    # Mapping Data (36 Zona Angular)
-    valid_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    # Mapping Data
+    valid_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:/.?=&-_#"
+    deg_per_zone = 360.0 / len(valid_chars)
     result_string = ""
     
     for d in valid_dots:
@@ -86,8 +87,8 @@ def decode_barcode(image_path):
         # Mengkalkulasi derajat relatif terhadap Segitiga Marker (Searah jarum jam)
         rel_angle = (math.degrees(angle_dot - angle_0) + 360) % 360
         
-        # Membulatkan derajat ke kelipatan 10 terdekat (Zona 10 derajat)
-        idx = int(round(rel_angle / 10.0)) % 36
+        # Membulatkan derajat ke kelipatan terdekat sesuai zona
+        idx = int(round(rel_angle / deg_per_zone)) % len(valid_chars)
         result_string += valid_chars[idx]
         
     print("\n" + "="*50)

@@ -13,7 +13,8 @@ def generate_minimalist_barcode(text_input: str, output_filename: str = "barcode
     high_res_size = size * scale
     
     text_input = text_input.upper()
-    valid_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    valid_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:/.?=&-_#"
+    deg_per_zone = 360.0 / len(valid_chars)
     
     filtered_text = "".join([c for c in text_input if c in valid_chars])
     
@@ -27,18 +28,21 @@ def generate_minimalist_barcode(text_input: str, output_filename: str = "barcode
     layer = Image.new("RGBA", (high_res_size, high_res_size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
     
-    outline_width = 3 * scale  
-    line_width = 6 * scale     
-    white_dot_radius = 12 * scale
-    black_dot_radius = white_dot_radius + outline_width
+    num_chars = len(filtered_text)
+    line_width = max(2 * scale, int(6 * scale * min(1.0, 30 / num_chars)))
     
     # Kalkulasi offset jarak untuk merekam urutan
-    num_chars = len(filtered_text)
-    # Maksimal offset masuk ke dalam adalah 35*scale pixel
-    radial_step = min(35 * scale, (radius - 150*scale) / max(1, num_chars))
+    max_radial_space = radius - (50 * scale)
+    radial_step = min(45 * scale, max_radial_space / max(1, num_chars))
+    
+    # Mathematical sizing to guarantee NO OVERLAP between dots on the same angle
+    # The black dot MUST be smaller than radial_step / 2
+    black_dot_radius = min(15 * scale, radial_step * 0.45)
+    outline_width = max(1, int(black_dot_radius * 0.25))
+    white_dot_radius = black_dot_radius - outline_width
     
     letters = set([c for c in filtered_text if c.isalpha()])
-    pil_angles_letters = sorted([((valid_chars.index(c) * 10) - 90) % 360 for c in letters])
+    pil_angles_letters = sorted([((valid_chars.index(c) * deg_per_zone) - 90) % 360 for c in letters])
     
     bbox = [center - radius, center - radius, center + radius, center + radius]
     
@@ -73,7 +77,7 @@ def generate_minimalist_barcode(text_input: str, output_filename: str = "barcode
     # ==========================================
     for i, char in enumerate(filtered_text):
         idx = valid_chars.index(char)
-        pil_angle = ((idx * 10) - 90) % 360
+        pil_angle = ((idx * deg_per_zone) - 90) % 360
         rad_angle = math.radians(pil_angle)
         
         current_radius = radius - (i * radial_step)
@@ -92,7 +96,7 @@ def generate_minimalist_barcode(text_input: str, output_filename: str = "barcode
     # ==========================================
     for i, char in enumerate(filtered_text):
         idx = valid_chars.index(char)
-        pil_angle = ((idx * 10) - 90) % 360
+        pil_angle = ((idx * deg_per_zone) - 90) % 360
         rad_angle = math.radians(pil_angle)
         
         current_radius = radius - (i * radial_step)
