@@ -442,6 +442,29 @@ function findBullseyes(thresh, hierarchy) {
 // ==========================================
 let lastResult = null;
 
+// Web Audio API Beep
+function playBeep() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz (Note A5) for a crisp scanner beep
+        
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Set volume
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); // Quick fade out
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+        // Silently ignore if Audio API is blocked or unsupported
+    }
+}
+
 function displayResult(text, info) {
     if (text === lastResult) return;
     lastResult = text;
@@ -453,7 +476,8 @@ function displayResult(text, info) {
         setTimeout(() => container.style.boxShadow = '', 400);
     }
 
-    // Haptic feedback (50ms vibrate)
+    // Audio & Haptic feedback
+    playBeep();
     if (navigator.vibrate) {
         try { navigator.vibrate(50); } catch(e) {}
     }
