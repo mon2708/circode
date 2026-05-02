@@ -14,7 +14,7 @@ Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
   - **Equilateral Filtering**: Memilih finder yang paling stabil berdasarkan geometri segitiga sama sisi.
   - **Inverted Bit Fallback**: Mampu membaca kode dalam kondisi kontras terbalik (light-on-dark).
 - **Smart "Go to Link"**: Deteksi otomatis protokol URL (http/www) dengan tombol akses langsung setelah scan.
-- **Designer Friendly**: Opsi download dengan latar belakang transparan (.png) untuk integrasi desain profesional.
+- **Designer Friendly**: Opsi download dengan latar belakang hitam, putih, atau transparan (.png) untuk integrasi desain profesional.
 
 ---
 
@@ -24,13 +24,61 @@ Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
 Buka `index.html` di browser Anda (disarankan melalui Local Server atau HTTPS untuk akses kamera).
 
 1.  **Generator**: Masukkan teks atau URL, lalu klik **Generate**.
-2.  **Download**: Pilih **Black BG** untuk cetak standar atau **Transparent** untuk kebutuhan desain.
-3.  **Scanner**: Klik **Live Cam** untuk scan real-time menggunakan kamera HP/Laptop, atau **Upload** gambar yang sudah ada.
+2.  **Download**: Pilih **Black**, **White**, atau **Trans** sesuai kebutuhan desain Anda.
+3.  **Scanner**: Klik **Live Cam** untuk scan real-time, atau **Upload** gambar yang sudah ada.
 
-### Persyaratan Python (Optional)
-Untuk integrasi backend, instalasi library berikut:
+### Integrasi Python
+Instalasi library:
 ```bash
-pip install pillow opencv-python numpy
+pip install pillow opencv-python numpy`
+```
+#### Generator
+```bash
+python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
+```
+**Argumen:**
+- `--text`: Teks yang ingin di-encode (Mendukung Huruf Besar, Kecil, Angka, dan Simbol).
+- `--bg`: Mode latar belakang (`black`, `white`, atau `transparent`).
+- `--show-text`: Menampilkan label teks di bawah barcode.
+
+
+**Example**
+
+  Background black
+```bash
+python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
+```
+<img width="256" height="256" alt="circode-Remon_2026-black" src="https://github.com/user-attachments/assets/5e425ee9-9d20-405b-9717-2bb2a520ea43" />
+
+
+Background white
+```bash
+python minimalist_barcode.py --text "Remon-2026" --bg white --show-text --out "barcode.png"
+```
+<img width="256" height="256" alt="circode-Remon_2026-white" src="https://github.com/user-attachments/assets/50c07f09-1994-442c-b05f-7195c352ee3f" />
+
+
+Background transparent
+```bash
+python minimalist_barcode.py --text "Remon-2026" --bg transparent --show-text --out "barcode.png"
+```
+<img width="256" height="256" alt="circode-Remon_2026-transparent" src="https://github.com/user-attachments/assets/8056d2c3-ae0e-464f-b277-c307717fef03" />
+
+
+
+**Example no/show text**
+
+--show-text
+<img width="512" height="512" alt="secret" src="https://github.com/user-attachments/assets/c5e0323a-21bd-4ca0-b4f8-2fd580d33d46" />
+
+no text
+<img width="512" height="512" alt="secret1" src="https://github.com/user-attachments/assets/52379618-3193-46ad-8d71-01ff394fd8c4" />
+
+
+
+#### Scanner
+```bash
+python decoder.py --image "barcode.png"
 ```
 
 ---
@@ -38,18 +86,12 @@ pip install pillow opencv-python numpy
 ## 📐 Spesifikasi Teknis
 
 ### Encoding Logic
-- **Charset**: `0-9`, `A-Z`, dan simbol khusus (`:/.?=&-_#`).
+- **Charset**: `0-9`, `A-Z`, `a-z`, dan simbol (`:/.?=&-_#%@+*()[]{}<>!$`).
 - **Data Structure**:
-  - **Header**: 6-bit panjang data.
-  - **Payload**: 6-bit per karakter (Base64-like).
-  - **Checksum**: 6-bit verifikasi integritas data untuk mencegah false-positive.
-- **Capacity**: Mendukung hingga 12 ring data (tergantung panjang teks).
-
-### Scanner Pipeline
-1.  **Adaptive Thresholding**: Menangani kondisi cahaya yang tidak merata.
-2.  **Contour Analysis**: Mencari struktur bullseye (lingkaran dalam lingkaran).
-3.  **Coordinate Mapping**: Mentransformasi koordinat polar ke grid biner berdasarkan 3 titik referensi.
-4.  **Bit Sampling**: Mengambil rata-rata nilai pixel pada pusat sektor data.
+  - **Header**: 6-bit (Panjang Data).
+  - **Payload**: 7-bit per karakter (Case-sensitive).
+  - **Checksum**: 6-bit (Sum modulo 64).
+- **Grid**: 36 sektor per ring.
 
 ---
 
