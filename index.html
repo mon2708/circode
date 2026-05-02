@@ -4,30 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Primary Meta Tags -->
-    <title>CirCode - Circular QR Hybrid System</title>
+
+    <title>CirCode - Circular QR System</title>
     <meta name="title" content="CirCode - Circular QR Hybrid System">
-    <meta name="description" content="CirCode is a next-generation hybrid circular barcode and QR code system designed for modern aesthetics and high-speed OpenCV reading. Generate and decode polar grid codes instantly.">
-    <meta name="keywords" content="CirCode, circular QR code, visual code, barcode generator, OpenCV scanner, neo-brutalist, javascript QR scanner, polar grid barcode, remon">
+    <meta name="description"
+        content="CirCode is a next-generation hybrid circular barcode and QR code system designed for modern aesthetics and high-speed OpenCV reading. Generate and decode polar grid codes instantly.">
+    <meta name="keywords"
+        content="CirCode, circular QR code, visual code, barcode generator, OpenCV scanner, neo-brutalist, javascript QR scanner, polar grid barcode, remon">
     <meta name="author" content="Remon">
     <meta name="theme-color" content="#000000">
-
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://github.com/mon2708/circode">
     <meta property="og:title" content="CirCode - Circular QR Hybrid System">
-    <meta property="og:description" content="A futuristic, highly reliable circular barcode system built with OpenCV. Generate and scan beautifully curved data rings directly from your browser.">
-    
-    <!-- Twitter -->
+    <meta property="og:description"
+        content="A futuristic, highly reliable circular barcode system built with OpenCV. Generate and scan beautifully curved data rings directly from your browser.">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://github.com/mon2708/circode">
     <meta property="twitter:title" content="CirCode - Circular QR Hybrid System">
-    <meta property="twitter:description" content="A futuristic, highly reliable circular barcode system built with OpenCV. Generate and scan beautifully curved data rings directly from your browser.">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
+    <meta property="twitter:description"
+        content="A futuristic, highly reliable circular barcode system built with OpenCV. Generate and scan beautifully curved data rings directly from your browser.">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='none' stroke='%2322d3a5' stroke-width='3'/><circle cx='12' cy='12' r='4' fill='%2322d3a5'/></svg>">
 
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,26 +67,16 @@
                     </svg>
                     Scanner
                 </button>
-                <a href="docs.html" class="tab-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    Docs
-                </a>
             </div>
 
-            <!-- GENERATOR SECTION -->
+
             <section id="generator" class="tab-content active" role="tabpanel">
                 <div class="control-panel">
                     <div class="input-group">
                         <label for="textInput">DATA INPUT</label>
                         <div class="input-row">
-                            <input type="text" id="textInput" placeholder="Text or URL..." value=""
-                                autocomplete="off" autocorrect="off" spellcheck="false">
+                            <input type="text" id="textInput" placeholder="Text or URL..." value="" autocomplete="off"
+                                autocorrect="off" spellcheck="false">
                             <button id="generateBtn" class="primary-btn">Generate</button>
                         </div>
                         <div class="segmented-control">
@@ -101,15 +90,32 @@
                     </div>
                     <div class="download-row">
                         <button id="downloadBlackBtn" class="secondary-btn flex-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="2" />
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7,10 12,15 17,10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
                             Black
                         </button>
                         <button id="downloadWhiteBtn" class="secondary-btn flex-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2" stroke="white" fill="white"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="2" stroke="white" fill="white" />
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7,10 12,15 17,10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
                             White
                         </button>
                         <button id="downloadTransparentBtn" class="secondary-btn flex-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7,10 12,15 17,10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
                             Trans
                         </button>
                     </div>
@@ -122,7 +128,6 @@
                 </div>
             </section>
 
-            <!-- SCANNER SECTION -->
             <section id="scanner" class="tab-content" role="tabpanel">
                 <div class="control-panel scanner-controls">
                     <div class="status-row">
@@ -195,8 +200,11 @@
         </main>
 
         <footer>
-            <p>GNU GPLv3 · Created by Remon · <a href="https://github.com/mon2708/circode" target="_blank"
-                    rel="noopener">GitHub</a></p>
+            <p>GNU GPLv3 · Created by Remon · <a href="https://github.com/mon2708/circode" target="_blank" class="dot"
+                    rel="noopener">GitHub</a>
+                <bold style="color: white;">.</bold>
+                <a href="/docs.html" style="color: white;">Docs</a>
+            </p>
         </footer>
     </div>
     <script src="app.js"></script>

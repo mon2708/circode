@@ -76,7 +76,7 @@ h1 {
 }
 
 .dot {
-    -webkit-text-fill-color: var(--accent);
+    -webkit-text-fill-color: #22d3a5
 }
 
 .version-badge {
@@ -145,7 +145,6 @@ h1 {
     box-shadow: 0 2px 12px rgba(58, 58, 58, 0.45);
 }
 
-/* ===== TAB CONTENT ===== */
 .tab-content {
     display: none;
     flex-direction: column;
@@ -353,15 +352,15 @@ canvas#barcodeCanvas {
     z-index: 1;
 }
 
-.segmented-control-input:checked + .segmented-control-label .glider {
+.segmented-control-input:checked+.segmented-control-label .glider {
     transform: translateX(100%);
 }
 
-.segmented-control-input:not(:checked) + .segmented-control-label .off-text {
+.segmented-control-input:not(:checked)+.segmented-control-label .off-text {
     color: var(--text-primary);
 }
 
-.segmented-control-input:checked + .segmented-control-label .on-text {
+.segmented-control-input:checked+.segmented-control-label .on-text {
     color: var(--text-primary);
 }
 
