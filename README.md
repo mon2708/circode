@@ -54,5 +54,4 @@ Sistem membagi lingkaran 360° menjadi 36 zona (masing-masing 10°):
 
 ---
 
-**Developed by Antigravity AI**
-*Role: Senior Python Developer & Graphic Engineer*
+**Developed by Remon**
