@@ -48,20 +48,20 @@ python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "b
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
 ```
-<img width="1000" height="1000" alt="circode-https___www_youtube_-black" src="https://github.com/user-attachments/assets/c3c3f7d3-c52d-41d5-a88f-3265afe271b0" />
+<img width="256" height="256" alt="circode-https___www_youtube_-black" src="https://github.com/user-attachments/assets/c3c3f7d3-c52d-41d5-a88f-3265afe271b0" />
 
 
 Background white
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg white --show-text --out "barcode.png"
 ```
-<img width="1000" height="1000" alt="circode-REMON2026-white" src="https://github.com/user-attachments/assets/d7ab096c-17af-4070-a578-494f1a177a9c" />
+<img width="256" height="256" alt="circode-REMON2026-white" src="https://github.com/user-attachments/assets/d7ab096c-17af-4070-a578-494f1a177a9c" />
 
 Background transparent
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg transparent --show-text --out "barcode.png"
 ```
-<img width="1000" height="1000" alt="circode-REMON2026-transparent" src="https://github.com/user-attachments/assets/18fe9250-f731-4f22-957c-acd9c1800748" />
+<img width="256" height="256" alt="circode-REMON2026-transparent" src="https://github.com/user-attachments/assets/18fe9250-f731-4f22-957c-acd9c1800748" />
 
 
 **Example no/show text**
