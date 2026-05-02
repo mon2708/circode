@@ -1,52 +1,56 @@
-# Circode: Minimalist Visual Code System
+# CirCode v2: Hybrid Circular-Binary Code System
 
-Circode adalah sistem identifikasi visual melingkar yang menggabungkan estetika desain futuristik dengan fungsionalitas data encoding berbasis sudut (Angular Encoding). Project ini dirancang untuk branding premium, label produk, dan identitas visual unik.
+**CirCode v2** adalah evolusi dari sistem kode visual melingkar yang menjembatani estetika futuristik dengan reliabilitas tinggi setingkat QR Code. Berbeda dengan sistem sirkular tradisional yang bergantung pada posisi sudut tunggal, CirCode v2 menggunakan **Binary Polar Grid** yang jauh lebih tahan terhadap noise dan distorsi kamera.
 
 ## 🚀 Fitur Utama
 
-Sistem ini menggunakan pendekatan **Minimalist Single-Ring** yang dioptimalkan untuk performa cetak dan pembacaan digital:
+Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
 
-- **Radial Offset Sequence**: Meskipun hanya menggunakan satu cincin, sistem ini tetap bisa menyimpan urutan karakter (sequence) dan menangani karakter ganda dengan cara menempatkan titik data secara menjorok ke dalam (Spiral/Radial).
-- **Radar Spoke Design**: Menghubungkan titik data ke cincin utama dengan garis tipis ("jari-jari") untuk memberikan tampilan terstruktur ala radar militer/Sci-Fi. Ini memecahkan masalah estetika titik yang terlihat acak.
-- **Orientation Marker**: Dilengkapi dengan segitiga penunjuk arah (0°) agar kode tetap bisa dibaca secara akurat meskipun posisi stiker miring atau terbalik.
-- **Print-Safe Design**: Ketebalan garis (6px) dan ukuran titik (12px) telah disesuaikan agar tetap tajam saat dicetak pada media fisik seperti stiker kecil atau plat label.
+- **Hybrid Binary-Polar Grid**: Data disimpan dalam kisi-kisi biner 36 sektor (filled=1, empty=0) yang disusun secara radial (bercincin).
+- **3-Bullseye Finder System**: Menggunakan 3 penanda konsentris pada 0°, 120°, dan 240° untuk deteksi posisi, skala, dan rotasi otomatis. Ini memungkinkan pembacaan dari sudut mana pun.
+- **Timing Ring Calibration**: Dilengkapi dengan cincin kalibrasi luar untuk memastikan sampling data yang presisi pada setiap sektor.
+- **Robust Decoder Engine (OpenCV.js)**:
+  - **Aspect Ratio Correction**: Mengoreksi distorsi lensa kamera HP agar lingkaran tetap bulat sempurna saat diproses.
+  - **Equilateral Filtering**: Memilih finder yang paling stabil berdasarkan geometri segitiga sama sisi.
+  - **Inverted Bit Fallback**: Mampu membaca kode dalam kondisi kontras terbalik (light-on-dark).
+- **Smart "Go to Link"**: Deteksi otomatis protokol URL (http/www) dengan tombol akses langsung setelah scan.
+- **Designer Friendly**: Opsi download dengan latar belakang transparan (.png) untuk integrasi desain profesional.
 
 ---
 
 ## 🛠️ Cara Penggunaan
 
-### Persyaratan
-Instalasi library yang dibutuhkan menggunakan pip:
+### Versi Web (Rekomendasi)
+Buka `index.html` di browser Anda (disarankan melalui Local Server atau HTTPS untuk akses kamera).
+
+1.  **Generator**: Masukkan teks atau URL, lalu klik **Generate**.
+2.  **Download**: Pilih **Black BG** untuk cetak standar atau **Transparent** untuk kebutuhan desain.
+3.  **Scanner**: Klik **Live Cam** untuk scan real-time menggunakan kamera HP/Laptop, atau **Upload** gambar yang sudah ada.
+
+### Persyaratan Python (Optional)
+Untuk integrasi backend, instalasi library berikut:
 ```bash
 pip install pillow opencv-python numpy
 ```
 
-### Generator (Membuat Barcode)
-Gunakan `minimalist_barcode.py` untuk menghasilkan gambar barcode:
-```bash
-python minimalist_barcode.py --text "REMON2026" --out "barcode.png"
-```
-**Argumen:**
-- `--text`: Teks yang ingin di-encode (Angka 0-9 dan Huruf A-Z).
-- `--out`: Nama file output (.png).
-- `--no-text`: Gunakan flag ini untuk menyembunyikan tulisan teks di bawah logo (untuk hasil yang lebih bersih).
+---
 
-### Scanner / Decoder (Membaca Barcode)
-Gunakan `decoder.py` untuk memproses gambar dan mengembalikan teks aslinya:
-```bash
-python decoder.py --image "barcode.png"
-```
+## 📐 Spesifikasi Teknis
+
+### Encoding Logic
+- **Charset**: `0-9`, `A-Z`, dan simbol khusus (`:/.?=&-_#`).
+- **Data Structure**:
+  - **Header**: 6-bit panjang data.
+  - **Payload**: 6-bit per karakter (Base64-like).
+  - **Checksum**: 6-bit verifikasi integritas data untuk mencegah false-positive.
+- **Capacity**: Mendukung hingga 12 ring data (tergantung panjang teks).
+
+### Scanner Pipeline
+1.  **Adaptive Thresholding**: Menangani kondisi cahaya yang tidak merata.
+2.  **Contour Analysis**: Mencari struktur bullseye (lingkaran dalam lingkaran).
+3.  **Coordinate Mapping**: Mentransformasi koordinat polar ke grid biner berdasarkan 3 titik referensi.
+4.  **Bit Sampling**: Mengambil rata-rata nilai pixel pada pusat sektor data.
 
 ---
 
-## 📐 Logika Encoding
-Sistem memetakan karakter ke dalam 36 zona angular (10° per zona):
-- **0 - 9**: Index 0 sampai 9.
-- **A - Z**: Index 10 sampai 35.
-- **0° (Arah Jam 12)**: Titik awal pembacaan (ditandai dengan segitiga).
-
-Urutan pembacaan didasarkan pada jarak titik dari pusat (Radial Distance). Titik terluar adalah karakter pertama, dan semakin masuk ke dalam adalah karakter selanjutnya.
-
----
-
-**Developed by Remon**
+**Developed by Remon · 2026**
