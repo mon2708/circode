@@ -181,8 +181,11 @@
                 </li>
                 <li><strong>Smart "Go to Link"</strong>: Deteksi otomatis protokol URL (http/www) dengan tombol akses
                     langsung setelah scan.</li>
+                <li><strong>Progressive Web App (PWA)</strong>: Mendukung instalasi langsung ke Home Screen HP dan dapat digunakan secara Offline tanpa koneksi internet.</li>
+                <li><strong>Audio & Haptic Feedback</strong>: Memberikan notifikasi getaran dan suara "Beep" instan setiap kali barcode berhasil dipindai.</li>
                 <li><strong>Designer Friendly</strong>: Opsi download dengan latar belakang transparan (.png) untuk
                     integrasi desain profesional.</li>
+                <li><strong>Smart Input Limit</strong>: Sistem validasi pintar yang membatasi input maksimal 63 karakter sesuai kapasitas fisik grid.</li>
             </ul>
 
             <h3>🛠️ Cara Penggunaan</h3>
@@ -200,6 +203,8 @@
             <h4>Persyaratan Python (Optional)</h4>
             <p>Untuk integrasi backend, instalasi library berikut:</p>
             <div class="code-block">pip install pillow opencv-python numpy</div>
+            <p style="margin-top: 1rem;">Untuk membuat barcode via CLI:</p>
+            <div class="code-block">python main_encode.py --text "Halo" --bg black --out test.png</div>
 
             <h3>📐 Spesifikasi Teknis</h3>
             <h4>Encoding Logic</h4>

@@ -14,7 +14,10 @@ Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
   - **Equilateral Filtering**: Memilih finder yang paling stabil berdasarkan geometri segitiga sama sisi.
   - **Inverted Bit Fallback**: Mampu membaca kode dalam kondisi kontras terbalik (light-on-dark).
 - **Smart "Go to Link"**: Deteksi otomatis protokol URL (http/www) dengan tombol akses langsung setelah scan.
+- **Progressive Web App (PWA)**: Mendukung instalasi langsung ke Home Screen HP dan dapat digunakan secara Offline tanpa koneksi internet.
+- **Audio & Haptic Feedback**: Memberikan notifikasi getaran dan suara "Beep" instan dari Web Audio API setiap kali barcode berhasil dipindai.
 - **Designer Friendly**: Opsi download dengan latar belakang hitam, putih, atau transparan (.png) untuk integrasi desain profesional.
+- **Smart Input Limit**: Sistem validasi pintar yang membatasi input maksimal 63 karakter sesuai kapasitas fisik grid.
 
 ---
 
@@ -34,7 +37,7 @@ pip install pillow opencv-python numpy`
 ```
 #### Generator
 ```bash
-python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
+python main_encode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
 ```
 **Argumen:**
 - `--text`: Teks yang ingin di-encode (Mendukung Huruf Besar, Kecil, Angka, dan Simbol).
@@ -46,7 +49,7 @@ python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "b
 
   Background black▼▼▼
 ```bash
-python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
+python main_encode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-black" src="https://github.com/user-attachments/assets/5e425ee9-9d20-405b-9717-2bb2a520ea43" />
 
@@ -55,7 +58,7 @@ python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "b
 
 Background white▼▼▼
 ```bash
-python minimalist_barcode.py --text "Remon-2026" --bg white --show-text --out "barcode.png"
+python main_encode.py --text "Remon-2026" --bg white --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-white" src="https://github.com/user-attachments/assets/50c07f09-1994-442c-b05f-7195c352ee3f" />
 
@@ -64,7 +67,7 @@ python minimalist_barcode.py --text "Remon-2026" --bg white --show-text --out "b
 
 Background transparent▼▼▼
 ```bash
-python minimalist_barcode.py --text "Remon-2026" --bg transparent --show-text --out "barcode.png"
+python main_encode.py --text "Remon-2026" --bg transparent --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-transparent" src="https://github.com/user-attachments/assets/8056d2c3-ae0e-464f-b277-c307717fef03" />
 
