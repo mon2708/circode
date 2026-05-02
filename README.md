@@ -59,10 +59,10 @@ python minimalist_barcode.py --text "Remon-2026" --bg transparent --show-text --
 **Example no/show text**
 
 --show-text
-<img width="1000" height="1100" alt="secret" src="https://github.com/user-attachments/assets/c5e0323a-21bd-4ca0-b4f8-2fd580d33d46" />
+<img width="256" height="256" alt="secret" src="https://github.com/user-attachments/assets/c5e0323a-21bd-4ca0-b4f8-2fd580d33d46" />
 
 no text
-<img width="1000" height="1000" alt="secret1" src="https://github.com/user-attachments/assets/52379618-3193-46ad-8d71-01ff394fd8c4" />
+<img width="256" height="256" alt="secret1" src="https://github.com/user-attachments/assets/52379618-3193-46ad-8d71-01ff394fd8c4" />
 
 
 
