@@ -44,25 +44,31 @@ python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "b
 
 **Example**
 
-  Background black
+  Background black▼▼▼
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-black" src="https://github.com/user-attachments/assets/5e425ee9-9d20-405b-9717-2bb2a520ea43" />
 
 
-Background white
+
+
+Background white▼▼▼
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg white --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-white" src="https://github.com/user-attachments/assets/50c07f09-1994-442c-b05f-7195c352ee3f" />
 
 
-Background transparent
+
+
+Background transparent▼▼▼
 ```bash
 python minimalist_barcode.py --text "Remon-2026" --bg transparent --show-text --out "barcode.png"
 ```
 <img width="256" height="256" alt="circode-Remon_2026-transparent" src="https://github.com/user-attachments/assets/8056d2c3-ae0e-464f-b277-c307717fef03" />
+
+
 
 
 
