@@ -45,6 +45,16 @@
                     </svg>
                     Scanner
                 </button>
+                <a href="docs.html" class="tab-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Docs
+                </a>
             </div>
 
             <!-- GENERATOR SECTION -->
@@ -53,17 +63,18 @@
                     <div class="input-group">
                         <label for="textInput">DATA INPUT</label>
                         <div class="input-row">
-                            <input type="text" id="textInput" placeholder="Text or URL..." value="REMON2026"
+                            <input type="text" id="textInput" placeholder="Text or URL..." value=""
                                 autocomplete="off" autocorrect="off" spellcheck="false">
                             <button id="generateBtn" class="primary-btn">Generate</button>
                         </div>
-                    </div>
-                    <div class="options-row">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="showLabelToggle">
-                            <span class="checkmark"></span>
-                            Show Label (Short text only)
-                        </label>
+                        <div class="segmented-control">
+                            <input type="checkbox" id="labelOn" class="segmented-control-input">
+                            <label for="labelOn" class="segmented-control-label">
+                                <span class="glider"></span>
+                                <span class="label-text off-text">Text Hidden</span>
+                                <span class="label-text on-text">Show Text</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="download-row">
                         <button id="downloadBlackBtn" class="secondary-btn flex-1">

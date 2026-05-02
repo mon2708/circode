@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CirCode - Documentation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .docs-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 0px var(--border);
+            padding: 2.5rem;
+            color: var(--text-primary);
+        }
+
+        .docs-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .docs-container h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .docs-container p {
+            line-height: 1.7;
+            margin-bottom: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .docs-container ul {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .docs-container li {
+            margin-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: #000;
+            color: #22d3a5;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .char-box {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            text-align: center;
+            padding: 8px 0;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 2px 2px 0px var(--border);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--border);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-mark">
+                    <div class="logo-inner"></div>
+                </div>
+                <h1>CirCode</h1>
+            </div>
+            <nav class="app-nav">
+                <a href="index.html" class="tab-btn" style="text-decoration: none; color: inherit;">App</a>
+                <a href="docs.html" class="tab-btn active" style="text-decoration: none; color: inherit;">Docs</a>
+            </nav>
+        </header>
+
+        <main class="docs-container">
+            <a href="index.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Kembali ke Aplikasi
+            </a>
+
+            <h2>CirCode: Hybrid Circular-Binary Code System</h2>
+            <p><strong>CirCode</strong> adalah evolusi dari sistem kode visual melingkar yang menjembatani estetika
+                futuristik dengan reliabilitas tinggi setingkat QR Code. Berbeda dengan sistem sirkular tradisional yang
+                bergantung pada posisi sudut tunggal, CirCode menggunakan <strong>Binary Polar Grid</strong> yang jauh
+                lebih tahan terhadap noise dan distorsi kamera.</p>
+
+            <h3>🚀 Fitur Utama</h3>
+            <p>Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:</p>
+            <ul>
+                <li><strong>Hybrid Binary-Polar Grid</strong>: Data disimpan dalam kisi-kisi biner 36 sektor (filled=1,
+                    empty=0) yang disusun secara radial (bercincin).</li>
+                <li><strong>3-Bullseye Finder System</strong>: Menggunakan 3 penanda konsentris pada 0°, 120°, dan 240°
+                    untuk deteksi posisi, skala, dan rotasi otomatis. Ini memungkinkan pembacaan dari sudut mana pun.
+                </li>
+                <li><strong>Timing Ring Calibration</strong>: Dilengkapi dengan cincin kalibrasi luar untuk memastikan
+                    sampling data yang presisi pada setiap sektor.</li>
+                <li><strong>Robust Decoder Engine (OpenCV.js)</strong>:
+                    <ul>
+                        <li><strong>Aspect Ratio Correction</strong>: Mengoreksi distorsi lensa kamera HP agar lingkaran
+                            tetap bulat sempurna saat diproses.</li>
+                        <li><strong>Equilateral Filtering</strong>: Memilih finder yang paling stabil berdasarkan
+                            geometri segitiga sama sisi.</li>
+                        <li><strong>Inverted Bit Fallback</strong>: Mampu membaca kode dalam kondisi kontras terbalik
+                            (light-on-dark).</li>
+                    </ul>
+                </li>
+                <li><strong>Smart "Go to Link"</strong>: Deteksi otomatis protokol URL (http/www) dengan tombol akses
+                    langsung setelah scan.</li>
+                <li><strong>Designer Friendly</strong>: Opsi download dengan latar belakang transparan (.png) untuk
+                    integrasi desain profesional.</li>
+            </ul>
+
+            <h3>🛠️ Cara Penggunaan</h3>
+            <h4>Versi Web (Rekomendasi)</h4>
+            <p>Buka <code>index.html</code> di browser Anda (disarankan melalui Local Server atau HTTPS untuk akses
+                kamera).</p>
+            <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted); line-height: 1.7;">
+                <li><strong>Generator</strong>: Masukkan teks atau URL, lalu klik <strong>Generate</strong>.</li>
+                <li><strong>Download</strong>: Pilih <strong>Black BG</strong> untuk cetak standar atau
+                    <strong>Trans</strong> untuk kebutuhan desain.</li>
+                <li><strong>Scanner</strong>: Klik <strong>Live Cam</strong> untuk scan real-time menggunakan kamera
+                    HP/Laptop, atau ikon <strong>Upload</strong> untuk memindai gambar yang sudah ada.</li>
+            </ol>
+
+            <h4>Persyaratan Python (Optional)</h4>
+            <p>Untuk integrasi backend, instalasi library berikut:</p>
+            <div class="code-block">pip install pillow opencv-python numpy</div>
+
+            <h3>📐 Spesifikasi Teknis</h3>
+            <h4>Encoding Logic</h4>
+            <ul>
+                <li><strong>Charset</strong>: <code>0-9</code>, <code>A-Z</code>, <code>a-z</code> dan simbol khusus
+                    (<code>:/.?=&-_#%@+*()[]{}<>!$</code>).</li>
+                <li><strong>Data Structure</strong>:
+                    <ul>
+                        <li><strong>Header</strong>: 6-bit panjang data.</li>
+                        <li><strong>Payload</strong>: 7-bit per karakter.</li>
+                        <li><strong>Checksum</strong>: 6-bit verifikasi integritas data untuk mencegah false-positive.
+                        </li>
+                    </ul>
+                </li>
+                <li><strong>Capacity</strong>: Mendukung hingga 12 ring data (tergantung panjang teks).</li>
+            </ul>
+
+            <h4>Scanner Pipeline</h4>
+            <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted); line-height: 1.7;">
+                <li><strong>Adaptive Thresholding</strong>: Menangani kondisi cahaya yang tidak merata.</li>
+                <li><strong>Contour Analysis</strong>: Mencari struktur bullseye (lingkaran dalam lingkaran).</li>
+                <li><strong>Coordinate Mapping</strong>: Mentransformasi koordinat polar ke grid biner berdasarkan 3
+                    titik referensi.</li>
+                <li><strong>Bit Sampling</strong>: Mengambil rata-rata nilai pixel pada pusat sektor data.</li>
+            </ol>
+
+            <hr style="border-color: var(--border); margin: 2rem 0;">
+            <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: var(--bg-main); border: 2px solid var(--border); border-radius: var(--radius);">
+                <p style="font-family: 'Space Mono', monospace; font-weight: bold; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 1rem;">Developed by Remon · 2026</p>
+                
+                <h4 style="color: var(--primary); margin-bottom: 0.8rem; font-size: 1rem;">🤝 Contributors</h4>
+                <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6;">
+                    <li><strong>Gemini (Google)</strong> - Core Logic & Mathematical Mapping Consultant</li>
+                    <li><strong>Claude (Anthropic)</strong> - Web Architecture & Scanner Optimization Consultant</li>
+                </ul>
+                
+                <hr style="border-color: var(--border); margin: 1rem auto; width: 50%;">
+                <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted);">*This project is a human-AI collaboration.*</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

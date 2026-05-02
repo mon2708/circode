@@ -275,24 +275,6 @@ button {
     flex: 1;
 }
 
-.options-row {
-    margin: 0.5rem 0;
-}
-
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    user-select: none;
-}
-
-.checkbox-container input {
-    cursor: pointer;
-}
-
 /* ===== CHAR COUNT ===== */
 .char-count-row {
     text-align: center;
@@ -320,6 +302,67 @@ canvas#barcodeCanvas {
     width: 100%;
     height: 100%;
     display: block;
+}
+
+/* Segmented Control - Premium Toggle */
+.segmented-control {
+    position: relative;
+    background: #000;
+    border: 2px solid var(--border);
+    padding: 4px;
+    margin-top: 1rem;
+    box-shadow: 4px 4px 0px var(--border);
+}
+
+.segmented-control-input {
+    display: none;
+}
+
+.segmented-control-label {
+    display: flex;
+    position: relative;
+    cursor: pointer;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    height: 38px;
+    z-index: 1;
+}
+
+.label-text {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    z-index: 2;
+    transition: color 0.3s ease;
+    user-select: none;
+    letter-spacing: -0.02em;
+}
+
+.glider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 1;
+}
+
+.segmented-control-input:checked + .segmented-control-label .glider {
+    transform: translateX(100%);
+}
+
+.segmented-control-input:not(:checked) + .segmented-control-label .off-text {
+    color: var(--text-primary);
+}
+
+.segmented-control-input:checked + .segmented-control-label .on-text {
+    color: var(--text-primary);
 }
 
 /* ===== SCANNER CONTROLS ===== */
