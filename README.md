@@ -1,6 +1,6 @@
-# CirCode v2: Hybrid Circular-Binary Code System
+# CirCode: Hybrid Circular-Binary Code System
 
-**CirCode v2** adalah evolusi dari sistem kode visual melingkar yang menjembatani estetika futuristik dengan reliabilitas tinggi setingkat QR Code. Berbeda dengan sistem sirkular tradisional yang bergantung pada posisi sudut tunggal, CirCode v2 menggunakan **Binary Polar Grid** yang jauh lebih tahan terhadap noise dan distorsi kamera.
+**CirCode** adalah evolusi dari sistem kode visual melingkar yang menjembatani estetika futuristik dengan reliabilitas tinggi setingkat QR Code. Berbeda dengan sistem sirkular tradisional yang bergantung pada posisi sudut tunggal, CirCode menggunakan **Binary Polar Grid** yang jauh lebih tahan terhadap noise dan distorsi kamera.
 
 ## 🚀 Fitur Utama
 
