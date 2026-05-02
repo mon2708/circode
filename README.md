@@ -14,7 +14,7 @@ Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
   - **Equilateral Filtering**: Memilih finder yang paling stabil berdasarkan geometri segitiga sama sisi.
   - **Inverted Bit Fallback**: Mampu membaca kode dalam kondisi kontras terbalik (light-on-dark).
 - **Smart "Go to Link"**: Deteksi otomatis protokol URL (http/www) dengan tombol akses langsung setelah scan.
-- **Designer Friendly**: Opsi download dengan latar belakang transparan (.png) untuk integrasi desain profesional.
+- **Designer Friendly**: Opsi download dengan latar belakang hitam, putih, atau transparan (.png) untuk integrasi desain profesional.
 
 ---
 
@@ -24,13 +24,24 @@ Sistem ini dirancang untuk performa real-world dengan fungsionalitas modern:
 Buka `index.html` di browser Anda (disarankan melalui Local Server atau HTTPS untuk akses kamera).
 
 1.  **Generator**: Masukkan teks atau URL, lalu klik **Generate**.
-2.  **Download**: Pilih **Black BG** untuk cetak standar atau **Transparent** untuk kebutuhan desain.
-3.  **Scanner**: Klik **Live Cam** untuk scan real-time menggunakan kamera HP/Laptop, atau **Upload** gambar yang sudah ada.
+2.  **Download**: Pilih **Black**, **White**, atau **Trans** sesuai kebutuhan desain Anda.
+3.  **Scanner**: Klik **Live Cam** untuk scan real-time, atau **Upload** gambar yang sudah ada.
 
-### Persyaratan Python (Optional)
-Untuk integrasi backend, instalasi library berikut:
+### Integrasi Python
+Instalasi library: `pip install pillow opencv-python numpy`
+
+#### Generator
 ```bash
-pip install pillow opencv-python numpy
+python minimalist_barcode.py --text "Remon-2026" --bg black --show-text --out "barcode.png"
+```
+**Argumen:**
+- `--text`: Teks yang ingin di-encode (Mendukung Huruf Besar, Kecil, Angka, dan Simbol).
+- `--bg`: Mode latar belakang (`black`, `white`, atau `transparent`).
+- `--show-text`: Menampilkan label teks di bawah barcode.
+
+#### Scanner
+```bash
+python decoder.py --image "barcode.png"
 ```
 
 ---
@@ -38,18 +49,12 @@ pip install pillow opencv-python numpy
 ## 📐 Spesifikasi Teknis
 
 ### Encoding Logic
-- **Charset**: `0-9`, `A-Z`, dan simbol khusus (`:/.?=&-_#`).
+- **Charset**: `0-9`, `A-Z`, `a-z`, dan simbol (`:/.?=&-_#%@+*()[]{}<>!$`).
 - **Data Structure**:
-  - **Header**: 6-bit panjang data.
-  - **Payload**: 6-bit per karakter (Base64-like).
-  - **Checksum**: 6-bit verifikasi integritas data untuk mencegah false-positive.
-- **Capacity**: Mendukung hingga 12 ring data (tergantung panjang teks).
-
-### Scanner Pipeline
-1.  **Adaptive Thresholding**: Menangani kondisi cahaya yang tidak merata.
-2.  **Contour Analysis**: Mencari struktur bullseye (lingkaran dalam lingkaran).
-3.  **Coordinate Mapping**: Mentransformasi koordinat polar ke grid biner berdasarkan 3 titik referensi.
-4.  **Bit Sampling**: Mengambil rata-rata nilai pixel pada pusat sektor data.
+  - **Header**: 6-bit (Panjang Data).
+  - **Payload**: 7-bit per karakter (Case-sensitive).
+  - **Checksum**: 6-bit (Sum modulo 64).
+- **Grid**: 36 sektor per ring.
 
 ---
 
