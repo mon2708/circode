@@ -264,9 +264,9 @@ generateCode(textInput.value);
 // SCANNER STATE
 // ==========================================
 let cvReady = false, streaming = false, isStarting = false, stream = null;
-let scanActive = false;
+let scanActive = false, isDecoding = false;
 let lastDecodeTime = 0;
-const DECODE_INTERVAL = 250; // ms between decode attempts
+const DECODE_INTERVAL = 300; // ms between decode attempts
 
 let video = document.getElementById('videoElement');
 let scanCanvas = document.getElementById('scannerOverlay');
@@ -276,10 +276,10 @@ let stopBtn = document.getElementById('stopCameraBtn');
 let statusDot = document.getElementById('statusDot');
 let cvStatus = document.getElementById('cvStatus');
 
-// Off-screen canvas for fast processing (smaller resolution)
+// Off-screen canvas for fast processing (tiny resolution, separate from HD preview)
 let offscreen = document.createElement('canvas');
 let offCtx = offscreen.getContext('2d', { willReadFrequently: true });
-const PROCESS_SIZE = 320; // Process at 320px for max speed on low-end phones
+const PROCESS_SIZE = 240; // OpenCV processes at 240px — camera preview stays HD
 
 function setStatus(state, text) {
     cvStatus.textContent = text;
@@ -306,8 +306,8 @@ async function startCamera() {
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: { ideal: 'environment' },
-                width: { ideal: 640 },
-                height: { ideal: 480 }
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             },
             audio: false
         });
@@ -396,9 +396,9 @@ function processFrame() {
     // Draw camera frame to overlay canvas
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
 
-    // Throttle decode for performance
+    // Throttle decode for performance — skip if previous decode still running
     const now = performance.now();
-    if (now - lastDecodeTime > DECODE_INTERVAL) {
+    if (!isDecoding && now - lastDecodeTime > DECODE_INTERVAL) {
         lastDecodeTime = now;
         decodeFrame(false);
     }
@@ -518,6 +518,8 @@ function displayResult(text, info) {
 // DECODE FRAME
 // ==========================================
 function decodeFrame(isStaticImage) {
+    if (isDecoding && !isStaticImage) return; // Prevent overlapping decode
+    isDecoding = true;
     try {
         let src, scale = 1;
 
@@ -547,9 +549,9 @@ function decodeFrame(isStaticImage) {
             cv.GaussianBlur(gray, blurred, new cv.Size(3, 3), 0);
             cv.threshold(blurred, thresh, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
         } else {
-            // Skip blur for live scan — adaptiveThreshold handles noise well enough
+            // MEAN_C is ~30% faster than GAUSSIAN_C, blockSize 21 is lighter than 31
             cv.adaptiveThreshold(gray, thresh, 255,
-                cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, -8);
+                cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 21, -5);
         }
 
         let bulls = findBullseyes(thresh, null);
@@ -651,5 +653,7 @@ function decodeFrame(isStaticImage) {
 
     } catch (e) {
         console.error('Decode error:', e);
+    } finally {
+        isDecoding = false; // Always release the lock so next frame can be processed
     }
 }
