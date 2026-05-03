@@ -265,8 +265,8 @@ generateCode(textInput.value);
 // ==========================================
 let cvReady = false, streaming = false, isStarting = false, stream = null;
 let scanActive = false, isDecoding = false;
-let lastDecodeTime = 0;
-const DECODE_INTERVAL = 300; // ms between decode attempts
+let lastFrameTime = 0;
+const FRAME_INTERVAL = 33; // ~30fps cap for preview loop
 
 let video = document.getElementById('videoElement');
 let scanCanvas = document.getElementById('scannerOverlay');
@@ -276,10 +276,10 @@ let stopBtn = document.getElementById('stopCameraBtn');
 let statusDot = document.getElementById('statusDot');
 let cvStatus = document.getElementById('cvStatus');
 
-// Off-screen canvas for fast processing (tiny resolution, separate from HD preview)
+// Off-screen canvas for OpenCV processing (separate from HD preview canvas)
 let offscreen = document.createElement('canvas');
 let offCtx = offscreen.getContext('2d', { willReadFrequently: true });
-const PROCESS_SIZE = 240; // OpenCV processes at 240px — camera preview stays HD
+const PROCESS_SIZE = 320; // OpenCV processes at 320px for good accuracy, preview stays HD
 
 function setStatus(state, text) {
     cvStatus.textContent = text;
@@ -388,23 +388,26 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
 });
 
 // ==========================================
-// PROCESS LOOP (~15fps preview, throttled decode)
+// PROCESS LOOP (rAF capped at 30fps, decode every frame if idle)
 // ==========================================
-function processFrame() {
+function processFrame(timestamp) {
     if (!scanActive || !streaming) return;
 
-    // Draw camera frame to overlay canvas
-    scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
+    // Cap preview to ~30fps
+    if (timestamp - lastFrameTime >= FRAME_INTERVAL) {
+        lastFrameTime = timestamp;
 
-    // Throttle decode for performance — skip if previous decode still running
-    const now = performance.now();
-    if (!isDecoding && now - lastDecodeTime > DECODE_INTERVAL) {
-        lastDecodeTime = now;
-        decodeFrame(false);
+        // Draw HD camera frame to overlay canvas
+        scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
+
+        // Attempt decode on every frame — isDecoding lock prevents concurrent runs
+        // HP kencang: decode ~30x/detik. HP lemah: decode setelah OpenCV selesai
+        if (!isDecoding) {
+            decodeFrame(false);
+        }
     }
 
-    // Use setTimeout for ~15fps preview instead of rAF to reduce CPU pressure
-    setTimeout(processFrame, 66);
+    requestAnimationFrame(processFrame);
 }
 
 // ==========================================
