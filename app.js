@@ -246,6 +246,14 @@ function downloadBarcode(bgMode) {
 
 document.getElementById('generateBtn').addEventListener('click', () => generateCode(textInput.value));
 textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generateCode(textInput.value); });
+textInput.addEventListener('input', () => {
+    const warningEl = document.getElementById('charLimitWarning');
+    if (textInput.value.length >= 63) {
+        warningEl.style.display = 'block';
+    } else {
+        warningEl.style.display = 'none';
+    }
+});
 document.getElementById('labelOn').addEventListener('change', () => generateCode(textInput.value));
 document.getElementById('downloadBlackBtn').addEventListener('click', () => downloadBarcode('black'));
 document.getElementById('downloadWhiteBtn').addEventListener('click', () => downloadBarcode('white'));
@@ -258,7 +266,7 @@ generateCode(textInput.value);
 let cvReady = false, streaming = false, isStarting = false, stream = null;
 let scanActive = false;
 let lastDecodeTime = 0;
-const DECODE_INTERVAL = 200; // ms between decode attempts for performance
+const DECODE_INTERVAL = 250; // ms between decode attempts
 
 let video = document.getElementById('videoElement');
 let scanCanvas = document.getElementById('scannerOverlay');
@@ -271,7 +279,7 @@ let cvStatus = document.getElementById('cvStatus');
 // Off-screen canvas for fast processing (smaller resolution)
 let offscreen = document.createElement('canvas');
 let offCtx = offscreen.getContext('2d', { willReadFrequently: true });
-const PROCESS_SIZE = 480; // Process at 480px for speed
+const PROCESS_SIZE = 320; // Process at 320px for max speed on low-end phones
 
 function setStatus(state, text) {
     cvStatus.textContent = text;
@@ -298,8 +306,8 @@ async function startCamera() {
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                width: { ideal: 640 },
+                height: { ideal: 480 }
             },
             audio: false
         });
@@ -380,21 +388,23 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
 });
 
 // ==========================================
-// PROCESS LOOP (throttled for performance)
+// PROCESS LOOP (~15fps preview, throttled decode)
 // ==========================================
-function processFrame(timestamp) {
+function processFrame() {
     if (!scanActive || !streaming) return;
 
     // Draw camera frame to overlay canvas
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
 
     // Throttle decode for performance
-    if (timestamp - lastDecodeTime > DECODE_INTERVAL) {
-        lastDecodeTime = timestamp;
+    const now = performance.now();
+    if (now - lastDecodeTime > DECODE_INTERVAL) {
+        lastDecodeTime = now;
         decodeFrame(false);
     }
 
-    requestAnimationFrame(processFrame);
+    // Use setTimeout for ~15fps preview instead of rAF to reduce CPU pressure
+    setTimeout(processFrame, 66);
 }
 
 // ==========================================
@@ -534,9 +544,11 @@ function decodeFrame(isStaticImage) {
 
         let thresh = new cv.Mat();
         if (isStaticImage) {
+            cv.GaussianBlur(gray, blurred, new cv.Size(3, 3), 0);
             cv.threshold(blurred, thresh, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
         } else {
-            cv.adaptiveThreshold(blurred, thresh, 255,
+            // Skip blur for live scan — adaptiveThreshold handles noise well enough
+            cv.adaptiveThreshold(gray, thresh, 255,
                 cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, -8);
         }
 

@@ -77,9 +77,12 @@
                         <label for="textInput">DATA INPUT</label>
                         <div class="input-row">
                             <input type="text" id="textInput" placeholder="Text or URL..." value="" autocomplete="off"
-                                autocorrect="off" spellcheck="false">
+                                autocorrect="off" spellcheck="false" maxlength="63">
                             <button id="generateBtn" class="primary-btn">Generate</button>
                         </div>
+                        <div id="charLimitWarning"
+                            style="color: #ff3366; font-size: 0.75rem; margin-top: 6px; display: none; font-weight:bold">
+                            Maksimal 63 karakter!</div>
                         <div class="segmented-control">
                             <input type="checkbox" id="labelOn" class="segmented-control-input">
                             <label for="labelOn" class="segmented-control-label">
